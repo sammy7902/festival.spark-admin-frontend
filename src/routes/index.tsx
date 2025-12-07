@@ -7,6 +7,7 @@ import { GenerateBill } from "../pages/GenerateBill";
 import { Categories } from "../pages/Categories";
 import { Subcategories } from "../pages/Subcategories";
 import { Items } from "../pages/Items";
+import { ViewBill } from "../pages/ViewBill";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 import { AppLayout } from "../components/layout/AppLayout";
 
@@ -24,6 +25,8 @@ export const Routes: React.FC = () => {
   return (
     <RouterRoutes>
       <Route path="/login" element={<Login />} />
+      {/* Public route for viewing bills via token */}
+      <Route path="/bill/:token" element={<ViewBill />} />
       <Route
         path="/"
         element={
