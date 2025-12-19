@@ -8,7 +8,7 @@ import { Card } from '../ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/Table';
 import { api } from '../../lib/axios';
 import { formatCurrency, toSmallestUnit } from '../../utils/currency';
-import { downloadFile, copyToClipboard } from '../../utils/download';
+import { downloadFile, copyToClipboard, getBackendPDFUrl, ensureFrontendUrl } from '../../utils/download';
 import { toast } from 'sonner';
 import type {
   ApiResponse,
@@ -304,14 +304,18 @@ export const BillStepper = () => {
     }
 
     try {
+      // Convert frontend URL to backend PDF URL for direct download
+      const backendPdfUrl = getBackendPDFUrl(createdBill.pdfLink);
+      
       // Try download first
-      await downloadFile(createdBill.pdfLink, `Bill-${createdBill.bill.billNumber}.pdf`);
-      toast.success('Opening PDF...');
+      await downloadFile(backendPdfUrl, `Bill-${createdBill.bill.billNumber}.pdf`);
+      toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Download error:', error);
-      // Fallback: open in new tab
+      // Fallback: open backend URL in new tab
       try {
-        window.open(createdBill.pdfLink, '_blank', 'noopener,noreferrer');
+        const backendPdfUrl = getBackendPDFUrl(createdBill.pdfLink);
+        window.open(backendPdfUrl, '_blank', 'noopener,noreferrer');
         toast.success('PDF opened in new tab');
       } catch (openError) {
         console.error('Failed to open PDF:', openError);
@@ -327,7 +331,9 @@ export const BillStepper = () => {
     }
 
     try {
-      await copyToClipboard(createdBill.pdfLink);
+      // Ensure we're copying the frontend URL, not backend URL
+      const frontendUrl = ensureFrontendUrl(createdBill.pdfLink);
+      await copyToClipboard(frontendUrl);
       toast.success('Link copied to clipboard');
     } catch (error) {
       toast.error('Failed to copy link');
